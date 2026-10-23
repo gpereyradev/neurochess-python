@@ -55,7 +55,8 @@ function renderBoard(){
  for(const [vr,r] of rows.entries())for(const [vc,c] of cols.entries()){
   const square=FILES[c]+(8-r),piece=game.board[r][c],button=el('button','square '+((r+c)%2?'dark':'light'));
   button.type='button';button.dataset.square=square;button.setAttribute('role','gridcell');
-  button.setAttribute('aria-label',square+', '+(piece==='.'?'vacía':NAMES[piece.toLowerCase()]+' '+(white(piece)?'blanco':'negro')));
+  const ending=['q','r'].includes(piece.toLowerCase())?'a':'o';
+  button.setAttribute('aria-label',square+', '+(piece==='.'?'vacía':NAMES[piece.toLowerCase()]+' '+(white(piece)?'blanc':'negr')+ending));
   button.setAttribute('aria-selected',String(square===selected));
   button.setAttribute('aria-rowindex',vr+1);button.setAttribute('aria-colindex',vc+1);
   button.tabIndex=square===(focus||selected||(flipped?'e7':'e2'))?0:-1;

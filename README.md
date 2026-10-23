@@ -4,7 +4,10 @@
 contra un motor Minimax programado en Python, con poda alfa-beta, movimientos
 legales y una interfaz de juego adaptable a computadoras y celulares.
 
-![Vista de escritorio](docs/preview-desktop.png)
+![Vista de escritorio](docs/preview-desktop-v3.jpg)
+
+[Ver la vista móvil](docs/preview-mobile-v3.jpg) ·
+[Ver el modo oscuro](docs/preview-dark-v3.jpg)
 
 ## Interfaz de juego (v3)
 
