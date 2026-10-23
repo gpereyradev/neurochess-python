@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0c0a14" />
+  <meta name="description" content="NeuroChess: ajedrez contra una IA programada en Python con Minimax y poda alfa-beta. Proyecto de portafolio de ingeniería de software e IA." />
+  <title>NeuroChess | IA Minimax en Python</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/styles.css" />
+  <script defer src="/app.js"></script>
+</head>
+<body data-theme="dark">
+  <div class="ambient one" aria-hidden="true"></div><div class="ambient two" aria-hidden="true"></div>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-icon" aria-hidden="true">♞</span><span class="brand-words"><strong>NEURO<span>CHESS</span></strong><small>MINIMAX AI LAB · PYTHON EDITION</small></span></div>
+      <div class="header-actions"><span class="eyebrow-badge"><span class="dot"></span> MOTOR LOCAL · SIN APIs</span><button class="icon-button" id="themeToggle" type="button" title="Cambiar tema" aria-label="Cambiar tema">☀</button></div>
+    </header>
+    <section class="intro"><div><div class="overline">PROYECTO DE INGENIERÍA DE SOFTWARE + IA <span class="tiny-line"></span> 001 / CHESS AI</div><h1>Piensa. Calcula. <em>Juega.</em></h1><p>Enfréntate a una inteligencia artificial que explora futuros posibles mediante <strong>Minimax y poda alfa-beta</strong>. Cada movimiento tiene una razón.</p></div><span class="edition">PY<span>3</span><small>NO REACT<br>NO DOCKER</small></span></section>
+    <main class="workspace">
+      <section class="game-panel" aria-label="Zona de juego">
+        <div class="panel-heading"><div class="engine-identity"><span class="avatar ai-avatar">AI</span><div><strong>NeuroChess Engine</strong><small id="topSub">Python Minimax · esperando partida</small></div></div><span id="thinkingLabel" class="turn-indicator"><span class="pulse-dot"></span> LISTO</span></div>
+        <div class="board-wrap"><div id="board" class="board" role="grid" aria-label="Tablero de ajedrez de 8 por 8"></div></div>
+        <div class="player-strip"><div class="engine-identity"><span class="avatar human-avatar">TÚ</span><div><strong>Jugador</strong><small id="bottomSub">Blancas · empiezas tú</small></div></div><div id="statusPill" class="status-pill">Tu turno</div></div>
+        <div class="action-bar"><button id="undoBtn" class="btn subtle" type="button">↶ <span>Deshacer turno</span></button><button id="hintBtn" class="btn subtle" type="button">✧ <span>Pista de la IA</span></button><button id="flipBtn" class="btn subtle" type="button">⇅ <span>Girar tablero</span></button><button id="drawBtn" class="btn subtle" type="button" hidden>½ <span>Reclamar tablas</span></button></div>
+        <p class="feedback" id="feedback" aria-live="polite">Selecciona una pieza blanca para ver sus movimientos legales.</p>
+      </section>
+      <aside class="sidebar" aria-label="Herramientas del juego">
+        <section class="side-card"><div class="card-top"><h2><span class="card-icon">⚙</span> CONFIGURACIÓN DEL MOTOR</h2><span class="version-pill">v2.0 PY</span></div>
+          <label for="difficulty">Nivel de dificultad</label><div class="select-holder"><select id="difficulty"><option value="1">01 · Principiante · profundidad 1</option><option value="2" selected>02 · Intermedio · profundidad 2</option><option value="3">03 · Avanzado · profundidad 3</option><option value="4">04 · Experto · profundidad 4</option></select><span>⌄</span></div>
+          <p class="field-note">La IA busca hasta <strong id="depthText">2 jugadas medias</strong> hacia adelante. El límite de tiempo puede reducir la profundidad real.</p>
+          <label>Jugar con</label><div class="segmented" role="group" aria-label="Seleccionar color"><button type="button" class="active" id="chooseWhite" aria-pressed="true">♙ Blancas</button><button type="button" id="chooseBlack" aria-pressed="false">♟ Negras</button></div>
+          <button type="button" id="newBtn" class="btn primary">↻ <span>Nueva partida</span><span class="key-hint">↵</span></button>
+        </section>
+        <section class="side-card"><div class="card-top"><h2><span class="card-icon">⌁</span> ANÁLISIS DE IA</h2><span class="tag">MINIMAX</span></div>
+          <div class="metric-grid"><div><span>POSICIONES EXPLORADAS</span><strong id="nodes" class="metric">—</strong></div><div><span>PODAS ALFA-BETA</span><strong id="cuts" class="metric">—</strong></div><div><span>TIEMPO DE CÁLCULO</span><strong id="time" class="metric">—</strong></div><div><span>PROFUNDIDAD EFECTIVA</span><strong id="depth" class="metric">—</strong></div></div>
+          <div class="evaluation"><div class="eval-title"><span>EVALUACIÓN DE LA POSICIÓN</span><strong id="score">0.00</strong></div><div class="eval-track"><div class="eval-fill" id="evalFill" style="width:50%"></div></div><div class="eval-ends"><span>NEGRAS</span><span>BLANCAS</span></div></div>
+          <div class="engine-note" id="engineNote">Las estadísticas aparecerán después de la primera jugada de la IA.</div>
+        </section>
+        <section class="side-card history-card"><div class="card-top"><h2><span class="card-icon">♜</span> HISTORIAL DE PARTIDA</h2><span id="count" class="version-pill">0 jugadas</span></div><div class="history-head"><span>#</span><span>BLANCAS</span><span>NEGRAS</span></div><div id="moveHistory" class="moves-history" aria-live="polite"><p class="empty-history">Los movimientos aparecerán aquí.</p></div></section>
+        <section class="tech-note"><span class="tech-symbol">&lt;/&gt;</span><div><strong>¿Cómo funciona?</strong><p>Python genera jugadas legales, Minimax evalúa las consecuencias y alfa-beta elimina ramas innecesarias. Sin APIs pagadas, sin modelos externos.</p></div></section>
+      </aside>
+    </main>
+    <footer><span>NEUROCHESS © 2026 · PROYECTO DE PORTAFOLIO</span><span>PYTHON 3 · MINIMAX · ALPHA-BETA PRUNING</span></footer>
+  </div>
+  <dialog id="promotionDialog" class="promotion-dialog"><div class="modal-inside"><h2>Coronar peón</h2><p>Elige la pieza a la que quieres promocionar.</p><div id="promotionChoices" class="promotion-choices"></div><button type="button" class="btn subtle" id="cancelPromotion">Cancelar</button></div></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

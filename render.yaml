@@ -1,0 +1,9 @@
+# Despliegue web Python sin Docker ni dependencias externas.
+services:
+  - type: web
+    name: neurochess-python
+    runtime: python
+    plan: free
+    buildCommand: python -m compileall -q .
+    startCommand: python app.py
+    healthCheckPath: /api/health
