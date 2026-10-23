@@ -1,50 +1,43 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#0c0a14" />
-  <meta name="description" content="NeuroChess: ajedrez contra una IA programada en Python con Minimax y poda alfa-beta. Proyecto de portafolio de ingeniería de software e IA." />
-  <title>NeuroChess | IA Minimax en Python</title>
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="/styles.css" />
-  <script defer src="/app.js"></script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f4f2ec">
+<meta name="description" content="Juega al ajedrez contra un motor Minimax hecho en Python. Cuatro niveles, pistas y partidas sin reloj.">
+<title>NeuroChess — Ajedrez a tu ritmo</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css?v=3"><script defer src="/app.js?v=3"></script>
 </head>
-<body data-theme="dark">
-  <div class="ambient one" aria-hidden="true"></div><div class="ambient two" aria-hidden="true"></div>
-  <div class="app-shell">
-    <header class="topbar">
-      <div class="brand"><span class="brand-icon" aria-hidden="true">♞</span><span class="brand-words"><strong>NEURO<span>CHESS</span></strong><small>MINIMAX AI LAB · PYTHON EDITION</small></span></div>
-      <div class="header-actions"><span class="eyebrow-badge"><span class="dot"></span> MOTOR LOCAL · SIN APIs</span><button class="icon-button" id="themeToggle" type="button" title="Cambiar tema" aria-label="Cambiar tema">☀</button></div>
-    </header>
-    <section class="intro"><div><div class="overline">PROYECTO DE INGENIERÍA DE SOFTWARE + IA <span class="tiny-line"></span> 001 / CHESS AI</div><h1>Piensa. Calcula. <em>Juega.</em></h1><p>Enfréntate a una inteligencia artificial que explora futuros posibles mediante <strong>Minimax y poda alfa-beta</strong>. Cada movimiento tiene una razón.</p></div><span class="edition">PY<span>3</span><small>NO REACT<br>NO DOCKER</small></span></section>
-    <main class="workspace">
-      <section class="game-panel" aria-label="Zona de juego">
-        <div class="panel-heading"><div class="engine-identity"><span class="avatar ai-avatar">AI</span><div><strong>NeuroChess Engine</strong><small id="topSub">Python Minimax · esperando partida</small></div></div><span id="thinkingLabel" class="turn-indicator"><span class="pulse-dot"></span> LISTO</span></div>
-        <div class="board-wrap"><div id="board" class="board" role="grid" aria-label="Tablero de ajedrez de 8 por 8"></div></div>
-        <div class="player-strip"><div class="engine-identity"><span class="avatar human-avatar">TÚ</span><div><strong>Jugador</strong><small id="bottomSub">Blancas · empiezas tú</small></div></div><div id="statusPill" class="status-pill">Tu turno</div></div>
-        <div class="action-bar"><button id="undoBtn" class="btn subtle" type="button">↶ <span>Deshacer turno</span></button><button id="hintBtn" class="btn subtle" type="button">✧ <span>Pista de la IA</span></button><button id="flipBtn" class="btn subtle" type="button">⇅ <span>Girar tablero</span></button><button id="drawBtn" class="btn subtle" type="button" hidden>½ <span>Reclamar tablas</span></button></div>
-        <p class="feedback" id="feedback" aria-live="polite">Selecciona una pieza blanca para ver sus movimientos legales.</p>
-      </section>
-      <aside class="sidebar" aria-label="Herramientas del juego">
-        <section class="side-card"><div class="card-top"><h2><span class="card-icon">⚙</span> CONFIGURACIÓN DEL MOTOR</h2><span class="version-pill">v2.0 PY</span></div>
-          <label for="difficulty">Nivel de dificultad</label><div class="select-holder"><select id="difficulty"><option value="1">01 · Principiante · profundidad 1</option><option value="2" selected>02 · Intermedio · profundidad 2</option><option value="3">03 · Avanzado · profundidad 3</option><option value="4">04 · Experto · profundidad 4</option></select><span>⌄</span></div>
-          <p class="field-note">La IA busca hasta <strong id="depthText">2 jugadas medias</strong> hacia adelante. El límite de tiempo puede reducir la profundidad real.</p>
-          <label>Jugar con</label><div class="segmented" role="group" aria-label="Seleccionar color"><button type="button" class="active" id="chooseWhite" aria-pressed="true">♙ Blancas</button><button type="button" id="chooseBlack" aria-pressed="false">♟ Negras</button></div>
-          <button type="button" id="newBtn" class="btn primary">↻ <span>Nueva partida</span><span class="key-hint">↵</span></button>
-        </section>
-        <section class="side-card"><div class="card-top"><h2><span class="card-icon">⌁</span> ANÁLISIS DE IA</h2><span class="tag">MINIMAX</span></div>
-          <div class="metric-grid"><div><span>POSICIONES EXPLORADAS</span><strong id="nodes" class="metric">—</strong></div><div><span>PODAS ALFA-BETA</span><strong id="cuts" class="metric">—</strong></div><div><span>TIEMPO DE CÁLCULO</span><strong id="time" class="metric">—</strong></div><div><span>PROFUNDIDAD EFECTIVA</span><strong id="depth" class="metric">—</strong></div></div>
-          <div class="evaluation"><div class="eval-title"><span>EVALUACIÓN DE LA POSICIÓN</span><strong id="score">0.00</strong></div><div class="eval-track"><div class="eval-fill" id="evalFill" style="width:50%"></div></div><div class="eval-ends"><span>NEGRAS</span><span>BLANCAS</span></div></div>
-          <div class="engine-note" id="engineNote">Las estadísticas aparecerán después de la primera jugada de la IA.</div>
-        </section>
-        <section class="side-card history-card"><div class="card-top"><h2><span class="card-icon">♜</span> HISTORIAL DE PARTIDA</h2><span id="count" class="version-pill">0 jugadas</span></div><div class="history-head"><span>#</span><span>BLANCAS</span><span>NEGRAS</span></div><div id="moveHistory" class="moves-history" aria-live="polite"><p class="empty-history">Los movimientos aparecerán aquí.</p></div></section>
-        <section class="tech-note"><span class="tech-symbol">&lt;/&gt;</span><div><strong>¿Cómo funciona?</strong><p>Python genera jugadas legales, Minimax evalúa las consecuencias y alfa-beta elimina ramas innecesarias. Sin APIs pagadas, sin modelos externos.</p></div></section>
-      </aside>
-    </main>
-    <footer><span>NEUROCHESS © 2026 · PROYECTO DE PORTAFOLIO</span><span>PYTHON 3 · MINIMAX · ALPHA-BETA PRUNING</span></footer>
-  </div>
-  <dialog id="promotionDialog" class="promotion-dialog"><div class="modal-inside"><h2>Coronar peón</h2><p>Elige la pieza a la que quieres promocionar.</p><div id="promotionChoices" class="promotion-choices"></div><button type="button" class="btn subtle" id="cancelPromotion">Cancelar</button></div></dialog>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-</body>
-</html>
+<body data-theme="light" data-board="sage">
+<a class="skip-link" href="#board">Ir al tablero</a>
+<header class="site-header">
+  <a class="brand" href="/" aria-label="NeuroChess, inicio"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M7 27h20M9 23h15l-1-5c5-2 5-9 0-12l-3-3-1 5-6 4-4 6 6 1 3-3-1 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>NeuroChess<span class="brand-dot">.</span></span></a>
+  <span class="header-note">Una partida, sin prisa.</span>
+  <div class="header-tools"><button id="soundToggle" class="icon-btn" type="button" aria-label="Activar sonido" aria-pressed="false" title="Sonido"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4 5 9H2v6h3l6 5V4Zm5 5 5 6m0-6-5 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button id="themeToggle" class="icon-btn" type="button" aria-label="Activar tema oscuro" title="Cambiar tema"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14A8 8 0 0 1 10 4a8 8 0 1 0 10 10Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></button></div>
+</header>
+<main class="layout">
+  <section class="play-area" aria-label="Zona de juego">
+    <div class="page-heading"><div><p class="eyebrow">AJEDREZ · UN JUGADOR</p><h1>Frente al tablero.</h1></div><span class="no-clock">Sin reloj</span></div>
+    <div class="player-row opponent"><div class="avatar computer" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4M8 10h.01M16 10h.01"/></svg></div><div class="player-info"><strong>Ordenador <span id="opponentLevel">Intermedio</span></strong><small id="topSub">Juega con negras</small></div><span id="thinkingLabel" class="thinking-label">Listo</span><div id="opponentCaptures" class="captures" aria-label="Piezas capturadas por el ordenador"></div></div>
+    <div class="board-frame"><div id="board" class="board" role="grid" aria-label="Tablero de ajedrez" aria-rowcount="8" aria-colcount="8"></div><div id="boardLoading" class="board-loading" hidden>Preparando tablero…</div></div>
+    <div class="player-row human"><div class="avatar human-avatar" aria-hidden="true">Tú</div><div class="player-info"><strong>Tu partida</strong><small id="bottomSub">Juegas con blancas</small></div><div id="humanCaptures" class="captures" aria-label="Tus piezas capturadas"></div><span id="statusPill" class="status-pill">Tu turno</span></div>
+    <div class="board-toolbar"><div class="move-tools"><button id="undoBtn" class="tool-btn" type="button" disabled title="Deshacer tu último turno"><span aria-hidden="true">↶</span> Deshacer</button><button id="hintBtn" class="tool-btn" type="button" disabled><span aria-hidden="true">◇</span> Pista</button><button id="flipBtn" class="tool-btn" type="button"><span aria-hidden="true">⇅</span> Girar</button></div><label class="board-palette"><span class="sr-only">Color del tablero</span><select id="boardTheme" aria-label="Color del tablero"><option value="sage">Olivo</option><option value="wood">Nogal</option><option value="slate">Pizarra</option></select></label></div>
+    <p id="feedback" class="feedback" role="status" aria-live="polite">Preparando tu partida…</p>
+    <div class="recovery-actions"><button id="retryBtn" class="text-btn" type="button" hidden>Reintentar conexión</button><button id="drawBtn" class="text-btn" type="button" hidden>Reclamar tablas</button></div>
+  </section>
+  <aside class="side-panel" aria-label="Herramientas de la partida">
+    <section class="game-controls"><div class="section-heading"><h2>Tu partida</h2><span class="live-dot" aria-hidden="true"></span></div>
+      <label class="field-label" for="difficulty">Dificultad del ordenador</label><select id="difficulty"><option value="1">Principiante</option><option value="2" selected>Intermedio</option><option value="3">Avanzado</option><option value="4">Experto</option></select><p class="field-help" id="difficultyNote">Un equilibrio entre rapidez y cálculo.</p>
+      <button id="newBtn" class="primary-btn" type="button"><span aria-hidden="true">+</span> Nueva partida</button>
+    </section>
+    <section class="history-section"><div class="section-heading"><h2>Jugadas</h2><span id="count" class="muted">0</span></div><div class="history-head"><span>N.º</span><span>Blancas</span><span>Negras</span></div><div id="moveHistory" class="moves-history" aria-label="Historial de jugadas"><div class="empty-history"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M10 8h20v26H10zM15 4h10v8H15zM15 18h10m-10 6h10m-10 6h6"/></svg><strong>La primera jugada es tuya.</strong><p>Elige una pieza y luego su destino.<br>Las casillas marcadas te guían.</p></div></div><div class="history-actions"><button id="exportBtn" class="text-btn" type="button" disabled>Descargar PGN <span aria-hidden="true">↗</span></button><button id="resignBtn" class="text-btn muted" type="button" disabled>Abandonar</button></div></section>
+    <details class="analysis-details"><summary>Dentro del motor <span aria-hidden="true">+</span></summary><p class="analysis-intro">Minimax compara posiciones; la poda alfa-beta evita explorar ramas que no mejoran la jugada.</p><dl class="metrics"><div><dt>Posiciones</dt><dd id="nodes">—</dd></div><div><dt>Ramas podadas</dt><dd id="cuts">—</dd></div><div><dt>Tiempo</dt><dd id="time">—</dd></div><div><dt>Profundidad</dt><dd id="depth">—</dd></div></dl><div class="evaluation"><span>Balance de la posición</span><strong id="score">0.00</strong><div class="eval-track"><div id="evalFill"></div></div><div class="eval-ends"><span>Negras</span><span>Blancas</span></div></div><p id="engineNote" class="field-help">El análisis aparece tras la primera respuesta.</p></details>
+    <p class="side-footnote">Hecho para jugar y aprender.<br><a href="https://github.com/gpereyradev/neurochess-python" target="_blank" rel="noopener">Ver el proyecto en GitHub <span aria-hidden="true">↗</span></a></p>
+  </aside>
+</main>
+<footer class="site-footer"><span>NeuroChess · Guillermo Pereyra</span><span>Motor Python · Minimax <span class="footer-divider">/</span> Piezas <a href="https://github.com/LexLuengas/chessnut-pieces" target="_blank" rel="noopener">Chessnut</a> · Apache 2.0</span></footer>
+<dialog id="newGameDialog" class="modal" aria-labelledby="newGameTitle"><form id="newGameForm"><p class="eyebrow">EMPEZAR DE NUEVO</p><h2 id="newGameTitle">Una nueva partida</h2><p id="newGameWarning">Elige tu color. Las blancas siempre empiezan.</p><fieldset><legend>Vas a jugar con</legend><div class="color-options"><label><input type="radio" name="color" value="white" checked><img src="/pieces/wK.svg" alt="">Blancas<small>Empiezas tú</small></label><label><input type="radio" name="color" value="black"><img src="/pieces/bK.svg" alt="">Negras<small>Empieza el ordenador</small></label></div></fieldset><p class="field-help">Dificultad: <strong id="newGameLevel">Intermedio</strong></p><div class="modal-actions"><button id="cancelNewGame" class="secondary-btn" type="button">Seguir jugando</button><button class="primary-btn" type="submit">Empezar</button></div></form></dialog>
+<dialog id="promotionDialog" class="modal" aria-labelledby="promotionTitle"><h2 id="promotionTitle">Tu peón llega al final</h2><p>Elige una pieza para coronar.</p><div id="promotionChoices" class="promotion-choices"></div><button id="cancelPromotion" class="secondary-btn" type="button">Volver al tablero</button></dialog>
+<dialog id="resignDialog" class="modal" aria-labelledby="resignTitle"><h2 id="resignTitle">¿Terminar esta partida?</h2><p>El ordenador ganará por abandono. Puedes descargar las jugadas antes de empezar otra.</p><div class="modal-actions"><button id="cancelResign" class="secondary-btn" type="button">Seguir jugando</button><button id="confirmResign" class="primary-btn" type="button">Abandonar partida</button></div></dialog>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body></html>

@@ -6,7 +6,10 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from chess_core import (START_FEN,from_fen,parse_square,legal_moves,find_move,make_move,
                         game_status,to_san,in_check,repetition_key)
 from ai import choose_move
-from app import api_post
+from ai import AlphaBeta, MATE
+from app import api_post, APIError, SESSIONS
+from unittest.mock import patch
+from time import monotonic
 
 
 def sequence(*moves):
@@ -94,6 +97,19 @@ class RulesTests(unittest.TestCase):
 
 
 class AITests(unittest.TestCase):
+    def test_horizon_stalemate_is_draw(self):
+        s=from_fen('7k/5Q2/6K1/8/8/8/8/8 b - - 0 1')
+        search=AlphaBeta(monotonic()+1)
+        self.assertEqual(search.minimax(s,0,-2*MATE,2*MATE),0)
+
+    def test_claimable_draw_does_not_force_zero_score(self):
+        s=from_fen('7k/8/6K1/8/8/8/Q7/8 w - - 100 1')
+        self.assertGreater(AlphaBeta(monotonic()+1).minimax(s,0,-2*MATE,2*MATE),500)
+
+    def test_checkmate_takes_priority_over_75_move_rule(self):
+        s=from_fen('7k/6Q1/6K1/8/8/8/8/8 b - - 150 1')
+        self.assertGreater(AlphaBeta(monotonic()+1).minimax(s,1,-2*MATE,2*MATE),99000)
+
     def test_minimax_returns_legal_move_for_black(self):
         s=sequence('d2d4')[-1]
         move, metrics=choose_move(s,2,time_limit=2)
@@ -117,6 +133,54 @@ class AITests(unittest.TestCase):
 
 
 class APITests(unittest.TestCase):
+    def test_settings_apply_without_resetting_game(self):
+        s=api_post('/api/new',{'difficulty':1})
+        moved=api_post('/api/move',{'game_id':s['game_id'],'move':'e2e4'})
+        changed=api_post('/api/settings',{'game_id':s['game_id'],'difficulty':3,'revision':moved['revision']})
+        self.assertEqual(changed['difficulty'],3)
+        self.assertEqual(changed['fen'],moved['fen'])
+        self.assertEqual(changed['moves'],moved['moves'])
+        with self.assertRaises(APIError):
+            api_post('/api/settings',{'game_id':s['game_id'],'difficulty':5})
+
+    def test_resign_result_and_undo(self):
+        s=api_post('/api/new',{})
+        api_post('/api/move',{'game_id':s['game_id'],'move':'e2e4'})
+        resigned=api_post('/api/resign',{'game_id':s['game_id']})
+        self.assertTrue(resigned['status']['finished'])
+        self.assertEqual(resigned['status']['winner'],'black')
+        with self.assertRaises(APIError): api_post('/api/ai',{'game_id':s['game_id']})
+        resumed=api_post('/api/undo',{'game_id':s['game_id']})
+        self.assertFalse(resumed['status']['finished'])
+        self.assertEqual(resumed['fen'],START_FEN)
+
+    def test_stale_revision_cannot_reapply_a_move_or_undo(self):
+        s=api_post('/api/new',{})
+        api_post('/api/move',{'game_id':s['game_id'],'move':'e2e4','revision':0})
+        with self.assertRaises(APIError) as caught:
+            api_post('/api/undo',{'game_id':s['game_id'],'revision':0})
+        self.assertEqual(caught.exception.status,409)
+        self.assertEqual(len(api_post('/api/state',{'game_id':s['game_id']})['moves']),1)
+
+    def test_inflight_ai_does_not_commit_after_resignation(self):
+        s=api_post('/api/new',{'difficulty':1})
+        api_post('/api/move',{'game_id':s['game_id'],'move':'e2e4'})
+        def resign_during_search(position,depth):
+            api_post('/api/resign',{'game_id':s['game_id']})
+            return choose_move(position,1)
+        with patch('app.choose_move',side_effect=resign_during_search):
+            with self.assertRaises(APIError) as caught:
+                api_post('/api/ai',{'game_id':s['game_id']})
+        self.assertEqual(caught.exception.status,409)
+        self.assertEqual(len(api_post('/api/state',{'game_id':s['game_id']})['moves']),1)
+
+    def test_captured_piece_includes_en_passant(self):
+        s=api_post('/api/new',{})
+        game=SESSIONS[s['game_id']]
+        for uci in ['e2e4','a7a6','e4e5','d7d5','e5d6']:
+            game.commit(find_move(game.positions[-1],uci),'human')
+        self.assertEqual(game.state()['moves'][-1]['captured'],'p')
+
     def test_new_game_and_move(self):
         state=api_post('/api/new',{'player':'white','difficulty':1})
         self.assertEqual(state['turn'],'white')

@@ -90,18 +90,17 @@ class AlphaBeta:
 
     def minimax(self, s: Position, depth: int, alpha: int, beta: int, ply: int = 0) -> int:
         self.tick()
-        if s.halfmove >= 100 or insufficient_material(s):
-            return 0
-        if depth == 0:
-            # Analizar mates aunque ocurran en el horizonte.
-            if in_check(s) and not legal_moves(s):
-                return -MATE + ply if s.turn == 1 else MATE - ply
-            return evaluate(s)
         moves = legal_moves(s)
         if not moves:
             if in_check(s):
                 return -MATE + ply if s.turn == 1 else MATE - ply
             return 0
+        # Mate y ahogado tienen prioridad, incluso en el horizonte.
+        # 50 movimientos permite reclamar tablas; 75 termina automáticamente.
+        if s.halfmove >= 150 or insufficient_material(s):
+            return 0
+        if depth == 0:
+            return evaluate(s)
         moves.sort(key=lambda m: ordering_score(s,m), reverse=True)
         if s.turn == 1:  # Las blancas MAXIMIZAN.
             score = -MATE * 2

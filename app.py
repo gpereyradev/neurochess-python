@@ -38,6 +38,7 @@ class Game:
         self.last_search = None
         self.hint = None
         self.claimed = None
+        self.resigned = False
         self.revision = 0
         self.lock = threading.RLock()
 
@@ -46,6 +47,9 @@ class Game:
         status = game_status(self.positions)
         if self.claimed:
             status.update(finished=True, reason=self.claimed, winner=None)
+        if self.resigned:
+            status.update(finished=True, reason='Abandono',
+                          winner='black' if self.player == 'white' else 'white')
         b = s.board
         return {
             'game_id':self.id,
@@ -65,8 +69,12 @@ class Game:
 
     def commit(self, move, actor):
         previous = self.positions[-1]
+        captured = previous.board[move.dst]
+        if move.flag == 'ep':
+            captured = previous.board[move.dst + 16 * previous.turn]
         item = {'number':previous.fullmove, 'side':'white' if previous.turn==1 else 'black',
-                'uci':move.uci, 'san':to_san(previous,move), 'by':actor}
+                'uci':move.uci, 'san':to_san(previous,move), 'by':actor,
+                'captured':captured if captured != '.' else None}
         self.moves.append(item)
         self.positions.append(make_move(previous,move))
         self.hint = None
@@ -84,6 +92,11 @@ def get_game(body):
     if not game:
         raise APIError('La partida expiró. Inicia una nueva.',404)
     return game
+
+
+def require_revision(game, body):
+    if 'revision' in body and body['revision'] != game.revision:
+        raise APIError('La partida cambió. Actualiza el tablero para continuar.', 409)
 
 
 def api_post(path, body):
@@ -109,10 +122,31 @@ def api_post(path, body):
     if path == '/api/state':
         with game.lock:
             return game.state()
+    if path == '/api/settings':
+        try: depth = int(body.get('difficulty'))
+        except (ValueError, TypeError): raise APIError('Dificultad inválida')
+        if depth not in (1, 2, 3, 4):
+            raise APIError('Dificultad inválida')
+        with game.lock:
+            require_revision(game, body)
+            game.difficulty = depth
+            game.last_search = None
+            game.hint = None
+            game.revision += 1
+            return game.state()
+    if path == '/api/resign':
+        with game.lock:
+            require_revision(game, body)
+            if game.state()['status']['finished']:
+                raise APIError('La partida ya terminó')
+            game.resigned = True
+            game.revision += 1
+            return game.state()
     if path == '/api/move':
         with game.lock:
+            require_revision(game, body)
             status = game_status(game.positions)
-            if status['finished'] or game.claimed:
+            if status['finished'] or game.claimed or game.resigned:
                 raise APIError('La partida ya terminó')
             s = game.positions[-1]
             if ('white' if s.turn==1 else 'black') != game.player:
@@ -126,8 +160,9 @@ def api_post(path, body):
             return game.state()
     if path in ('/api/ai','/api/hint'):
         with game.lock:
+            require_revision(game, body)
             status = game_status(game.positions)
-            if status['finished'] or game.claimed:
+            if status['finished'] or game.claimed or game.resigned:
                 raise APIError('La partida ya terminó')
             s = game.positions[-1]
             current_side = 'white' if s.turn==1 else 'black'
@@ -149,6 +184,7 @@ def api_post(path, body):
             return game.state()
     if path == '/api/undo':
         with game.lock:
+            require_revision(game, body)
             if not any(item['by']=='human' for item in game.moves):
                 raise APIError('Aún no hay un turno del jugador para deshacer')
             # Deshace la respuesta de la IA (si existe) y la última jugada humana.
@@ -161,10 +197,14 @@ def api_post(path, body):
             game.last_search = None
             game.hint = None
             game.claimed = None
+            game.resigned = False
             game.revision += 1
             return game.state()
     if path == '/api/claim-draw':
         with game.lock:
+            require_revision(game, body)
+            if game.resigned or game.claimed or game_status(game.positions)['finished']:
+                raise APIError('La partida ya terminó')
             status = game_status(game.positions)
             if not status.get('claimable_draw'):
                 raise APIError('No se pueden reclamar tablas en esta posición')
@@ -200,6 +240,10 @@ class Handler(BaseHTTPRequestHandler):
         names = {'/':'index.html','/index.html':'index.html','/styles.css':'styles.css','/app.js':'app.js',
                  '/favicon.svg':'favicon.svg'}
         name = names.get(path)
+        if path.startswith('/pieces/') and path.removeprefix('/pieces/') in {
+            side + piece + '.svg' for side in ('w', 'b') for piece in 'KQRBNP'
+        }:
+            name = path.lstrip('/')
         if not name:
             self._respond(404,{'error':'No encontrado'})
             return

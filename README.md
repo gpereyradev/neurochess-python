@@ -2,22 +2,29 @@
 
 **Un proyecto de portafolio de Ingeniería de Software con IA:** ajedrez jugable
 contra un motor Minimax programado en Python, con poda alfa-beta, movimientos
-legales y una interfaz oscura violeta adaptable a computadoras y celulares.
+legales y una interfaz de juego adaptable a computadoras y celulares.
 
 ![Vista de escritorio](docs/preview-desktop.png)
 
-## ¿Qué se corrigió de la versión anterior?
+## Interfaz de juego (v3)
 
-- **64 casillas cuadradas**, siempre de idénticas dimensiones. Una cuadrícula
-  CSS de `8 × 8` con filas y columnas explícitas y `aspect-ratio: 1` evita
-  que filas vacías se contraigan.
-- **Blancas siempre empiezan**, de acuerdo con las reglas del ajedrez.
-  La orientación predeterminada muestra las blancas abajo y se invierte si
-  eliges negras. La IA juega primero con blancas si tú eliges negras.
-- **Piezas distinguibles:** glifos diferentes, rellenos y contornos separados
-  para las piezas blancas y negras.
-- **Ya no hay React, Vite, npm, Node ni Docker.** El backend y el motor son Python;
-  el navegador usa HTML, CSS y un poco de JavaScript nativo para el tablero.
+El tablero ocupa el centro de la experiencia, con una paleta olivo/crema,
+modo oscuro y los temas Nogal y Pizarra. Las piezas Chessnut son SVG locales
+con siluetas y rellenos distintos para cada bando; no dependen de las fuentes
+del sistema. Consulta [los créditos de terceros](THIRD_PARTY_NOTICES.md).
+
+- Blancas siempre empiezan. Puedes elegir negras al iniciar otra partida.
+- Dificultad ajustable durante la partida, sin perder las jugadas.
+- Pistas, capturas, deshacer turno y abandono con confirmación.
+- Descarga de partidas en PGN con notación SAN y resultado.
+- Recuperación de la sesión al recargar, mientras el servidor siga activo.
+- Reintento de conexión que consulta primero el estado del servidor para
+  evitar duplicar jugadas si se pierde una respuesta.
+- Teclado: flechas para recorrer el tablero, Enter/espacio para seleccionar
+  y Escape para deseleccionar. Sonido opcional, desactivado por defecto.
+- Análisis Minimax desplegable con nodos, podas y profundidad efectiva.
+
+[**Jugar la demo pública**](https://neurochess-python.onrender.com)
 
 ## Ejecutar en Windows o Linux
 
@@ -56,7 +63,7 @@ neurochess-python/
 ├── ai.py                 # Evaluación, Minimax, alfa-beta y métricas
 ├── static/
 │   ├── index.html        # Vista principal
-│   ├── styles.css        # Tema morado oscuro, claro, tablero 8 × 8
+│   ├── styles.css        # Temas claro/oscuro, tablero 8 × 8
 │   ├── app.js            # Interacción (JavaScript nativo, sin React)
 │   └── favicon.svg
 ├── tests/test_chess.py   # Pruebas automatizadas con unittest
@@ -97,6 +104,8 @@ clásica de inteligencia artificial simbólica.
 | POST | `/api/undo` | Deshacer turno del jugador y respuesta IA |
 | POST | `/api/claim-draw` | Reclamar tablas cuando sea válido |
 | POST | `/api/state` | Consultar estado actual |
+| POST | `/api/settings` | Cambiar dificultad en la partida actual |
+| POST | `/api/resign` | Terminar por abandono |
 
 ## Pruebas automatizadas
 
@@ -104,7 +113,9 @@ clásica de inteligencia artificial simbólica.
 python -m unittest discover -s tests -v
 ```
 
-Las pruebas cubren el tablero inicial (20 jugadas legales), la referencia de
+Las 23 pruebas cubren carreras entre búsqueda y abandono, revisiones de estado,
+cambio de dificultad, capturas al paso, finales en el horizonte de Minimax y
+el tablero inicial (20 jugadas legales), la referencia de
 perft a profundidad 3 (8.902 posiciones), turno inicial, coronación, enroque,
 captura al paso, mate, tablas, resultados legales de Minimax y flujo de API.
 
@@ -163,4 +174,5 @@ memoria durante el funcionamiento del servidor y se pierden si el proceso
 se reinicia o el servidor gratuito se suspende. En una aplicación de alta
 concurrencia convendría un servidor y almacenamiento más robustos.
 
-Código bajo licencia MIT.
+Código bajo licencia MIT. Piezas Chessnut de Alexis Luengas bajo Apache 2.0;
+se incluye la licencia de los SVG en `static/pieces/LICENSE.txt`.
